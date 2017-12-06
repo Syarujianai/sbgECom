@@ -1,0 +1,5 @@
+/home/syaru/文档/H/sbg/sbgECom/projects/unix/build/CMakeFiles/edit_cache.dir
+/home/syaru/文档/H/sbg/sbgECom/projects/unix/build/CMakeFiles/sbgECom.dir
+/home/syaru/文档/H/sbg/sbgECom/projects/unix/build/CMakeFiles/ellipseMinimal.dir
+/home/syaru/文档/H/sbg/sbgECom/projects/unix/build/CMakeFiles/user.dir
+/home/syaru/文档/H/sbg/sbgECom/projects/unix/build/CMakeFiles/rebuild_cache.dir

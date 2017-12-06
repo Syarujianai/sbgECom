@@ -1,0 +1,2 @@
+/usr/bin/ar qc /home/syaru/文档/H/sbg/sbgECom/bin/libuser.a  CMakeFiles/user.dir/home/syaru/文档/H/sbg/sbgECom/user/serial.cpp.o CMakeFiles/user.dir/home/syaru/文档/H/sbg/sbgECom/user/control_car.cpp.o CMakeFiles/user.dir/home/syaru/文档/H/sbg/sbgECom/user/DataProcess.cpp.o CMakeFiles/user.dir/home/syaru/文档/H/sbg/sbgECom/user/OdomUpdate.cpp.o
+/usr/bin/ranlib /home/syaru/文档/H/sbg/sbgECom/bin/libuser.a

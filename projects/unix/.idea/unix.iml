@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="CPP_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$/../../common/crc/sbgCrc.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../common/crc/sbgCrc.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../common/interfaces/sbgInterface.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../common/interfaces/sbgInterface.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../common/interfaces/sbgInterfaceFile.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../common/interfaces/sbgInterfaceFile.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../common/interfaces/sbgInterfaceSerialUnix.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../common/interfaces/sbgInterfaceSerialUnix.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../common/interfaces/sbgInterfaceUdp.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../common/interfaces/sbgInterfaceUdp.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../common/network/sbgNetwork.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../common/network/sbgNetwork.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../common/platform/sbgPlatform.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../common/platform/sbgPlatform.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../common/splitBuffer/sbgSplitBuffer.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../common/splitBuffer/sbgSplitBuffer.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../common/streamBuffer/sbgStreamBuffer.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../common/streamBuffer/sbgStreamBuffer.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../common/swap/sbgSwap.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../common/swap/sbgSwap.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../common/version/sbgVersion.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../common/version/sbgVersion.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../examples/ellipseMinimal/src/ellipseMinimal.cpp">
+      <sourceFolder url="file://$MODULE_DIR$/../../examples/ellipseMinimal/src/ellipseMinimal.cpp" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogDebug.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogDebug.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogDvl.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogDvl.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogEkf.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogEkf.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogEvent.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogEvent.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogGps.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogGps.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogImu.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogImu.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogMag.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogMag.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogOdometer.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogOdometer.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogPressure.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogPressure.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogShipMotion.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogShipMotion.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogStatus.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogStatus.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogUsbl.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogUsbl.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogUtc.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogUtc.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogs.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogs.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/commands/sbgEComCmd.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/commands/sbgEComCmd.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdAdvanced.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdAdvanced.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdCommon.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdCommon.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdEvent.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdEvent.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdFeatures.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdFeatures.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdGnss.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdGnss.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdInfo.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdInfo.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdInterface.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdInterface.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdLicense.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdLicense.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdMag.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdMag.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdOdo.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdOdo.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdOutput.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdOutput.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdSensor.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdSensor.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdSettings.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdSettings.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/commands/transfer/sbgEComTransfer.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/commands/transfer/sbgEComTransfer.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/protocol/sbgEComProtocol.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/protocol/sbgEComProtocol.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/sbgECom.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/sbgECom.c" isTestSource="false" />
+    </content>
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library">
+      <library name="Header Search Paths">
+        <CLASSES>
+          <root url="file:///usr/lib/gcc/x86_64-linux-gnu/5/include-fixed" />
+          <root url="file:///usr/lib/gcc/x86_64-linux-gnu/5/include" />
+          <root url="file:///usr/include" />
+          <root url="file:///usr/local/include" />
+          <root url="file://$MODULE_DIR$/../../src" />
+          <root url="file://$MODULE_DIR$/../../common" />
+        </CLASSES>
+        <SOURCES>
+          <root url="file:///usr/lib/gcc/x86_64-linux-gnu/5/include-fixed" />
+          <root url="file:///usr/lib/gcc/x86_64-linux-gnu/5/include" />
+          <root url="file:///usr/include" />
+          <root url="file:///usr/local/include" />
+          <root url="file://$MODULE_DIR$/../../src" />
+          <root url="file://$MODULE_DIR$/../../common" />
+        </SOURCES>
+        <excluded>
+          <root url="file://$MODULE_DIR$/../../src/sbgECom.c" />
+          <root url="file://$MODULE_DIR$/../../src/commands/sbgEComCmd.c" />
+          <root url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdInfo.c" />
+          <root url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdCommon.c" />
+          <root url="file://$MODULE_DIR$/../../src/commands/transfer/sbgEComTransfer.c" />
+          <root url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdLicense.c" />
+          <root url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdOutput.c" />
+          <root url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdInterface.c" />
+          <root url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdFeatures.c" />
+          <root url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdAdvanced.c" />
+          <root url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdOdo.c" />
+          <root url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdSettings.c" />
+          <root url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdGnss.c" />
+          <root url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdEvent.c" />
+          <root url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdSensor.c" />
+          <root url="file://$MODULE_DIR$/../../src/commands/sbgEComCmdMag.c" />
+          <root url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogOdometer.c" />
+          <root url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogDvl.c" />
+          <root url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogMag.c" />
+          <root url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogDebug.c" />
+          <root url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogShipMotion.c" />
+          <root url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogUsbl.c" />
+          <root url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogStatus.c" />
+          <root url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogPressure.c" />
+          <root url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogImu.c" />
+          <root url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogEkf.c" />
+          <root url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogUtc.c" />
+          <root url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogs.c" />
+          <root url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogEvent.c" />
+          <root url="file://$MODULE_DIR$/../../src/binaryLogs/sbgEComBinaryLogGps.c" />
+          <root url="file://$MODULE_DIR$/../../src/protocol/sbgEComProtocol.c" />
+          <root url="file://$MODULE_DIR$/../../common/version/sbgVersion.c" />
+          <root url="file://$MODULE_DIR$/../../common/swap/sbgSwap.c" />
+          <root url="file://$MODULE_DIR$/../../common/streamBuffer/sbgStreamBuffer.c" />
+          <root url="file://$MODULE_DIR$/../../common/splitBuffer/sbgSplitBuffer.c" />
+          <root url="file://$MODULE_DIR$/../../common/platform/sbgPlatform.c" />
+          <root url="file://$MODULE_DIR$/../../common/interfaces/sbgInterfaceUdp.c" />
+          <root url="file://$MODULE_DIR$/../../common/interfaces/sbgInterfaceFile.c" />
+          <root url="file://$MODULE_DIR$/../../common/interfaces/sbgInterfaceSerialUnix.c" />
+          <root url="file://$MODULE_DIR$/../../common/interfaces/sbgInterface.c" />
+          <root url="file://$MODULE_DIR$/../../common/network/sbgNetwork.c" />
+          <root url="file://$MODULE_DIR$/../../common/crc/sbgCrc.c" />
+        </excluded>
+      </library>
+    </orderEntry>
+  </component>
+</module>

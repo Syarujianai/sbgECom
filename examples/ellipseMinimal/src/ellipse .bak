@@ -1,0 +1,680 @@
+#include "ros/ros.h"
+#include "sensor_msgs/Imu.h"
+#include "sensor_msgs/NavSatFix.h"
+#include "geometry_msgs/Vector3.h"
+#include "geometry_msgs/PoseStamped.h"
+#include <sbgEComLib.h>
+#include <sbgEComIds.h>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <fstream>
+#include "std_msgs/String.h"
+#include "std_msgs/Int64.h"
+#include "std_msgs/Int8.h"
+#include "LocalGeographicCS.hpp"
+#include "OdomUpdate.h"
+#include <vector>
+#include <ctime>
+#include <nav_msgs/Odometry.h>
+#include <tf/transform_datatypes.h>
+#include <tf/transform_broadcaster.h>
+using namespace std;
+
+sensor_msgs::Imu imu_msg;
+sensor_msgs::Imu imu_ekf;
+sensor_msgs::NavSatFix nav_msg;
+geometry_msgs::PoseStamped pose_msg;
+
+double car_mode_time,car_angle_time,car_speed_time;
+
+ros::Subscriber location;
+ros::Subscriber down_info;
+ros::Subscriber init_sub;
+
+ros::Subscriber turn_finish_sub;
+
+ros::Subscriber mode_change;
+ros::Subscriber car_info_sub;
+
+ros::Publisher other_info;
+ros::Publisher Time_info;
+
+bool new_imu_msg;
+bool new_nav_msg;
+bool new_twist_msg;
+bool new_heading = false;
+bool newLaserOdometry = false;
+
+bool new_init_pose = false;
+bool first_point = true;
+
+bool mode_chmode = false;
+
+float transformSum[6] = {0};
+
+int status_;
+int baseStationId;
+
+double lat;
+double lon;
+double height;
+
+double lateral_speed;
+double longitudinal_speed;
+double down_speed;
+
+double roll;
+double pitch;
+double heading;
+
+double roll_;
+double pitch_;
+double heading_;
+
+double roll_speed;
+double pitch_speed;
+double heading_speed;
+
+double lateral_accelerate;
+double longitudinal_accelerate;
+double down_accelerate;
+
+ofstream SaveGyro("/home/dky/catkin_lidar/src/loam_velodyne/output/delta_gyro.txt");
+
+double last_gyroscopes;
+double last_times;
+double angle_gyro = 0;
+double gyro_shift = 0;
+Odom trace= {0,0,0};
+int nn=0;
+Odom temp_li = {0,0,0};
+Odometry  haha;
+int cnt = 0;
+int change_cnt=0;
+
+
+double HEADing=0;
+
+#ifndef PI
+#define PI M_PI
+#endif
+#define to_degrees(x) ( (x) * (180.0 / M_PI ) )
+
+double Heading = 0.0;
+int32 HDT_time;
+short int HDT_status;
+double lats,lons,headings;
+
+double m_lat,m_lon;
+LocalGeographicCS lcs;
+
+double o1,o2,o3,o4,a1,a2,a3,a4;
+double f_lat,f_lon;
+int car_mode;
+
+double init_x,init_y,init_heading;
+int mode_now = 0;
+
+double now_mka_x,now_mka_y,now_heading;
+
+bool start_calc = false;
+
+string other_s,other_r;
+
+double EulerDis;
+
+void LocationHandler(const std_msgs::String::ConstPtr &msg){
+  //cout<<msg->data<<endl;
+  lats = 0;
+  lons = 0;
+  headings = 0;
+  string moves = msg->data;
+  stringstream stringin(moves);
+  stringin>>lats>>lons>>HEADing;
+
+  lcs.ll2xy(lats,lons,m_lat,m_lon);//给予当前经纬度
+}
+
+void Turn_finish_Handler(const std_msgs::Int8::ConstPtr &msg){
+    cnt = 0;
+    change_cnt++;
+    gyro_shift = 0;
+}
+
+void Car_Info_Handler(const std_msgs::String::ConstPtr &msg){
+  car_mode_time = 0;
+  car_angle_time = 0;
+  car_speed_time = 0;
+
+  string moves = msg->data;
+  stringstream stringin(moves);
+
+  stringin>>setprecision(12)>>car_mode_time>>car_angle_time>>car_speed_time;
+}
+
+void InfoHandler(const std_msgs::String::ConstPtr &msg){
+  o1 = o2 = o3 = o4 = a1 = a2 = a3 = a4 = 0;
+  string moves = msg->data;
+  stringstream stringin(moves);
+  stringin>>o1>>o2>>o3>>o4>>a1>>a2>>a3>>a4>>car_mode;
+}
+
+void InitHandler(const std_msgs::String::ConstPtr &msg){
+  init_x =  init_y = init_heading = 0;
+  string inits = msg->data;
+  stringstream stringin(inits);
+
+  stringin>>setprecision(12)>>init_x>>init_y>>init_heading;
+
+  new_init_pose = true;
+}
+
+void ModeHandler(const std_msgs::String::ConstPtr &msg){
+  mode_now = 0;
+  now_mka_x = 0;
+  now_mka_y = 0;
+
+  string chm = msg->data;
+  stringstream stringin(chm);
+  stringin>>setprecision(12)>>now_mka_x>>now_mka_y>>now_heading>>mode_now;
+
+  mode_chmode = true;
+}
+
+void laserOdometryHandler(const nav_msgs::Odometry::ConstPtr& laserOdometry)//loam里程计的累加结果
+{
+  //timeLaserOdometry = laserOdometry->header.stamp.toSec();
+
+  double roll, pitch, yaw;
+  geometry_msgs::Quaternion geoQuat = laserOdometry->pose.pose.orientation;
+  tf::Matrix3x3(tf::Quaternion(geoQuat.z, -geoQuat.x, -geoQuat.y, geoQuat.w)).getRPY(roll, pitch, yaw);
+
+  transformSum[0] = -pitch;
+  transformSum[1] = -yaw;
+  transformSum[2] = roll;
+
+  transformSum[3] = laserOdometry->pose.pose.position.x;
+  transformSum[4] = laserOdometry->pose.pose.position.y;
+  transformSum[5] = laserOdometry->pose.pose.position.z;
+
+  newLaserOdometry = true;
+}
+
+void Show()
+{
+
+			cout<<"*******SHOW THE INFORMATION FROM SBG*********"<<endl;
+
+			cout << "              Longitude:    " << setprecision(12) << lat << endl;
+			cout << "               Latitude:    " << setprecision(12) << lon << endl;
+			cout << "                 height:    " << setprecision(12) << height << endl;
+      cout<<endl;
+
+			// cout << "two                heading:    " << setprecision(12) << (Heading) << endl;
+   //    cout <<"last heading:                    "<<setprecision(12)<<HEADing<<endl;
+   //    cout<<endl;
+   //    cout<<"init "<<init_x<<" "<<init_y<<" "<<init_heading<<endl;
+			cout << "     lateral_accelerate:    " << setprecision(12) << lateral_accelerate << endl;
+			cout << "longitudinal_accelerate:    " << setprecision(12) << longitudinal_accelerate << endl;
+			cout << "        down_accelerate:    " << setprecision(12) << down_accelerate << endl;
+			cout<<endl;
+			cout << "             local x:    " << setprecision(12) << trace.x << endl;
+			cout << "            local y:    " << setprecision(12) << trace.y << endl;
+			cout << "          local heading:    " << setprecision(12) << angle_gyro*57.3<< endl;
+      cout<<endl;
+
+
+      if(cnt == 201){
+
+        cout << "              car mode:    " << setprecision(12) << car_mode_time << endl;
+        cout << "              car angle:    " << setprecision(12) << car_angle_time << endl;
+        cout << "              car speed:    " << setprecision(12) << car_speed_time << endl;
+        cout<<endl;
+
+
+
+        cout << change_cnt << " " << cnt <<" "<<new_init_pose<<" "<< start_calc <<" have complete"<< endl;
+      }else{
+
+        cout << "          baseStationId:    " << baseStationId << endl;
+        cout << "                 status:    " << status_ << endl << endl;
+        cout << trace.x << " " << trace.y << " " << trace.thea << endl;
+
+        cout << cnt <<" "<<new_init_pose<<" "<< start_calc << "have not init"<<endl;
+      }
+
+      //cout << "angle: " << angle_gyro << endl;
+      cout << "Mode: " << car_mode << endl;
+			//cout << gyroscopes << endl;
+      cout<<"odo: "<<o1<<" "<<o2<<" "<<o3<<" "<<o4<<" "<<a1<<" "<<a2<<" "<<a3<<" "<<a4<<endl;
+      //cout<<lats<<" "<<lons<<endl;
+}
+
+
+/*!
+ *  Callback definition called each time a new log is received.
+ *  \param[in]  pHandle                 Valid handle on the sbgECom instance that has called this callback.
+ *  \param[in]  msgClass                Class of the message we have received
+ *  \param[in]  msg                   Message ID of the log received.
+ *  \param[in]  pLogData                Contains the received log data as an union.
+ *  \param[in]  pUserArg                Optional user supplied argument.
+ *  \return                       SBG_NO_ERROR if the received log has been used successfully.
+ */
+SbgErrorCode onLogReceived(SbgEComHandle *pHandle, SbgEComClass msgClass, SbgEComMsgId msg, const SbgBinaryLogData *pLogData, void *pUserArg)
+{
+  // float time_of_week;
+
+  double times;
+  double gyroscopes;
+	Odom li = {0,0,0};
+  static long int WheelDistance1[4]={0};//轮子位移
+  long int WheelDir1[4]={0};//轮子转向角
+  long int WheelCount[4] = {0};
+
+	double delta_angle;
+	double delta_time;
+
+  int state=1;
+  double Distance;
+
+  switch (msg){
+    case SBG_ECOM_LOG_EKF_QUAT:
+
+
+      break;
+    case SBG_ECOM_LOG_EKF_NAV:
+
+      break;
+    case SBG_ECOM_LOG_SHIP_MOTION:
+
+      break;
+    case SBG_ECOM_LOG_GPS1_POS:
+      lat = nav_msg.latitude  = pLogData->gpsPosData.latitude;
+      lon = nav_msg.longitude = pLogData->gpsPosData.longitude;
+      height = nav_msg.altitude  = pLogData->gpsPosData.altitude;
+
+      status_ = ((int)(pLogData->gpsPosData.status) >> 6 & 63);
+      baseStationId = (int)(pLogData->gpsPosData.baseStationId);
+
+      new_nav_msg = true;
+      break;
+    case SBG_ECOM_LOG_IMU_DATA://看这里
+      lateral_accelerate = imu_msg.linear_acceleration.x = pLogData->imuData.accelerometers[0];//lateral_accelerate
+      longitudinal_accelerate = imu_msg.linear_acceleration.y = pLogData->imuData.accelerometers[1];//longitudinal_accelerate
+      down_accelerate = imu_msg.linear_acceleration.z = pLogData->imuData.accelerometers[2];//down_accelerate
+
+      roll_speed = imu_msg.angular_velocity.x = pLogData->imuData.gyroscopes[0];//roll_speed
+      pitch_speed = imu_msg.angular_velocity.y = pLogData->imuData.gyroscopes[1];//pitch_speed
+      heading_speed = imu_msg.angular_velocity.z = pLogData->imuData.gyroscopes[2];//heading_speed
+      new_imu_msg = true;
+
+      /*if(HEADing != 0){
+
+        times = pLogData->imuData.timeStamp;
+        gyroscopes = pLogData->imuData.gyroscopes[2];
+        delta_time = (times - last_times) * 1e-6;//s
+
+        //cout << setprecision(12) << times << " " << delta_time << " " << endl;
+        delta_angle = (last_gyroscopes + gyroscopes) * delta_time * 0.5;
+        angle_gyro += sbgRadToDegF(delta_angle);
+        HEADing +=  sbgRadToDegF(delta_angle);
+
+
+        last_times = times;
+        cout << "times-delta_time-delta_angle: " << times << " " << delta_time << " " << delta_angle << " " << angle_gyro << " " << HEADing << endl;
+        last_gyroscopes = gyroscopes;
+        new_heading = true;
+      }*/
+      if(new_init_pose)// && first_point
+      {
+        trace.x = init_x;
+        trace.y = init_y;
+
+        // trace.thea = -init_heading / 180.0 * 3.14159265;
+        // angle_gyro = -init_heading / 180.0 * 3.14159265;
+
+        trace.thea = init_heading; // 右手系数值 tanzby
+        angle_gyro = init_heading; // 右手系数值 tanzby
+
+        start_calc = true;
+        //first_point = false;
+        new_init_pose = false;
+        nn = 0;
+      }
+      //start_calc = true;
+      if(start_calc == true)
+      {
+        gyroscopes = pLogData->imuData.gyroscopes[2];
+        times = ros::Time::now().toSec();
+        delta_time = times - last_times;//s
+        last_times = times;
+        if(cnt < 200)
+        {
+          gyro_shift += gyroscopes;
+          cnt++;
+        }
+        else if(cnt == 200)
+        {
+          gyro_shift /= 200;
+          cnt++;
+
+          std_msgs::Int64 msg_cnt;
+          msg_cnt.data = cnt;
+          Time_info.publish(msg_cnt);
+        }
+        else
+        {
+          gyroscopes -= gyro_shift;
+          delta_angle = (last_gyroscopes + gyroscopes) * delta_time * 0.5;
+          last_gyroscopes = gyroscopes;
+          angle_gyro -= delta_angle;
+//          SaveGyro << ros::Time::now() << " " << gyroscopes << " " << delta_angle << " " << angle_gyro << endl;
+          //cout << "angle: " << angle_gyro << endl;
+        }
+// //first time 8 datas(0,1 wheel,0,1,2,3 odometry sums 6datas)and filter,change this,and computer's stamp(ms)
+//         if(nn==0)
+//         {
+//             WheelCount[0] = o1;
+//             WheelCount[1] = o2;
+//             WheelCount[2] = o3;
+//             WheelCount[3] = o4;
+//             WheelDir1[0] = a1;
+//             WheelDir1[1] = a2;
+//             WheelDir1[2] = a3;
+//             WheelDir1[3] = a4;
+//             haha.GetWheelCount(WheelCount);
+//         }
+//         else if(nn == 1)
+//         {
+//           WheelDistance1[0] = o1;
+//           WheelDistance1[1] = o2;
+//           WheelDistance1[2] = o3;
+//           WheelDistance1[3] = o4;
+
+//           WheelDir1[0] = a1;
+//           WheelDir1[1] = a2;
+//           WheelDir1[2] = a3;
+//           WheelDir1[3] = a4;
+//         }
+//         else
+//         {
+//             //if(fabs(o1 - WheelDistance1[0]) < 50 && fabs(o2 - WheelDistance1[1]) < 50 && fabs(o3 - WheelDistance1[2]) < 50 && fabs(o4 - WheelDistance1[3]) < 50)
+//             //{
+//             if(fabs(o1 - WheelDistance1[0]) < 100)
+//               WheelDistance1[0] = o1;
+//             if(fabs(o2 - WheelDistance1[1]) < 100)
+//               WheelDistance1[1] = o2;
+//             if(fabs(o3 - WheelDistance1[2]) < 100)
+//               WheelDistance1[2] = o3;
+//             if(fabs(o4 - WheelDistance1[3]) < 100)
+//               WheelDistance1[3] = o4;
+//             //}
+//             WheelDir1[0] = a1;
+//             WheelDir1[1] = a2;
+//             WheelDir1[2] = a3;
+//             WheelDir1[3] = a4;
+//         }
+
+        if(nn > 0)
+        {
+            haha.GetOdometry(WheelDistance1, WheelDir1, state, delta_angle);
+            li = haha.Update();
+
+            if(fabs(li.x)>0.6||fabs(li.y)>0.6||fabs(li.thea)>0.3)//阀值还需要调试
+            {
+                cout << " no change!" << endl;
+                li=temp_li;//如果有跳变，则采用上次的变化
+            }
+
+            if(mode_now == 0)
+            {
+              trace.x -= cos(trace.thea)*li.x-sin(trace.thea)*li.y;
+              trace.y += cos(trace.thea)*li.y+sin(trace.thea)*li.x;
+              trace.thea += li.thea;
+              trace.thea = 0.02 * trace.thea + 0.98 * angle_gyro;
+            }
+            else
+            {
+              trace.thea = angle_gyro;
+              // trace.thea = 0.02 * trace.thea + 0.98 * angle_gyro;
+              SaveGyro << ros::Time::now() << " " << times << " " << delta_time << " " << trace.thea*57.3 << " " << angle_gyro*57.3 << endl;
+
+            }
+
+            if(trace.thea < -PI)
+            {
+              trace.thea += 2 * PI;
+            }
+            else if(trace.thea > PI)
+            {
+              trace.thea -= 2 * PI;
+            }
+            // if(new_init_pose)
+            // {
+            //   new_init_pose = false;
+            //   EulerDis = sqrt((init_x - trace.x) * (init_x - trace.x) + (init_y - trace.y) * (init_y - trace.y));
+            //   //if(EulerDis < 0.5)
+            //   //{
+            //   // trace.x = 0.2 * trace.x + 0.8 * init_x;
+            //   // trace.y = 0.2 * trace.y + 0.8 * init_y;
+            //   // trace.thea = 0.2 * trace.thea + 0.8 * -init_heading;
+            //   //}
+            //   trace.x = init_x;
+            //   trace.y = init_y;
+            //   trace.thea = -init_heading;
+            // }
+            new_heading = true;
+
+            if((!(li.x==0&&li.y==0&&li.thea==0)) || mode_now == 1)
+            {
+                memcpy(WheelCount,WheelDistance1,4*sizeof(long int));
+                  //cout << WheelCount[0] << " " << WheelCount[1] << " " << WheelCount[2] << " " << WheelCount[3] << endl;
+                haha.GetWheelCount(WheelCount);
+            }
+            temp_li=li;
+        }
+        nn++;
+      }
+
+      break;
+
+      case SBG_ECOM_LOG_EKF_EULER://this is right
+
+
+      imu_msg.orientation.x = roll_ = sbgRadToDegF(pLogData->ekfEulerData.euler[0]);
+      imu_msg.orientation.y = pitch_ = sbgRadToDegF(pLogData->ekfEulerData.euler[1]);
+      //imu_msg.orientation.z = heading_ = sbgRadToDegF(pLogData->ekfEulerData.euler[2]);
+
+      pose_msg.pose.orientation.x = pLogData->ekfEulerData.euler[1];
+      pose_msg.pose.orientation.y = pLogData->ekfEulerData.euler[2];
+      pose_msg.pose.orientation.z = pLogData->ekfEulerData.euler[3];
+      pose_msg.pose.orientation.w = pLogData->ekfEulerData.euler[0];
+
+      //new_imu_msg = true;
+
+			break;
+
+      case SBG_ECOM_LOG_GPS1_HDT:
+
+			HDT_time = pLogData->gpsHdtData.timeStamp;
+			HDT_status = (int)(pLogData->gpsHdtData.status) & 63;
+
+      imu_msg.orientation.x = roll_ = sbgRadToDegF(pLogData->ekfEulerData.euler[0]);
+      imu_msg.orientation.y = pitch_ = sbgRadToDegF(pLogData->ekfEulerData.euler[1]);
+			imu_msg.orientation.z = Heading = pLogData->gpsHdtData.heading;
+
+      pose_msg.pose.orientation.x = pLogData->ekfEulerData.euler[1];
+      pose_msg.pose.orientation.y = pLogData->ekfEulerData.euler[2];
+      pose_msg.pose.orientation.z = pLogData->ekfEulerData.euler[3];
+      pose_msg.pose.orientation.w = pLogData->ekfEulerData.euler[0];
+
+      new_imu_msg = true;
+			break;
+
+    default:
+      break;
+  }
+  return SBG_NO_ERROR;
+}
+
+int main(int argc, char **argv)
+{
+  ros::init(argc, argv, "sbg_ellipse");
+
+  ros::NodeHandle n;
+  ros::Publisher imu_pub = n.advertise<sensor_msgs::Imu>("imu", 10);
+  ros::Publisher gps_pub = n.advertise<sensor_msgs::NavSatFix>("fix", 10);
+  ros::Publisher pose_pub = n.advertise<geometry_msgs::PoseStamped>("imu_pose", 10);
+
+  ros::Publisher gps_status_send = n.advertise<std_msgs::Int64>("gps_status",10);
+  //ros::Publisher odo_final = n.advertise<std_msgs::String>("odo_final_data",1000);
+
+  ros::Subscriber subLaserOdometry = n.subscribe<nav_msgs::Odometry>
+                                     ("/laser_odom_to_init", 5, laserOdometryHandler);
+
+  location = n.subscribe<std_msgs::String>("/Now_pos",1000,LocationHandler);//当前定位信息
+  down_info = n.subscribe<std_msgs::String>("/odo_send",1000,InfoHandler);
+
+  init_sub = n.subscribe<std_msgs::String>("location_icp",5,InitHandler);//初始位置接收
+  ros::Publisher heading_sbg = n.advertise<std_msgs::String>("/final_data",1000);//最终的位置信息
+
+  other_info = n.advertise<std_msgs::String>("other",1000);
+  Time_info = n.advertise<std_msgs::Int64>("vo_time",50);
+
+  car_info_sub = n.subscribe<std_msgs::String>("car_move_info",5,Car_Info_Handler);
+
+
+  mode_change = n.subscribe<std_msgs::String>("chmod",5,ModeHandler);
+
+  turn_finish_sub = n.subscribe<std_msgs::Int8>("init_finish",5,Turn_finish_Handler);
+
+
+  std::string uart_port;
+  int uart_baud_rate;
+  last_times = ros::Time::now().toSec();
+  //n.param<std::string>("uart_port", uart_port, "/dev/ttyUSB0");
+  n.param<std::string>("uart_port", uart_port, "/dev/sbg_driver");
+  n.param<int>("uart_baud_rate", uart_baud_rate, 115200);
+
+    // ********************* Initialize the SBG  *********************
+  SbgEComHandle       comHandle;
+  SbgInterface        sbgInterface;
+  SbgEComDeviceInfo   deviceInfo;
+  SbgErrorCode        errorCode;
+
+  errorCode = sbgInterfaceSerialCreate(&sbgInterface, uart_port.c_str(), uart_baud_rate);
+  if (errorCode != SBG_NO_ERROR){ROS_WARN("sbgInterfaceSerialCreate Error");}
+
+  errorCode = sbgEComInit(&comHandle, &sbgInterface); // Init the SBG
+  if (errorCode != SBG_NO_ERROR){ROS_WARN("sbgEComInit Error");}
+
+  errorCode = sbgEComCmdGetInfo(&comHandle, &deviceInfo); // Get device info
+  if (errorCode != SBG_NO_ERROR){ROS_WARN("sbgEComCmdGetInfo Error");}
+
+  ROS_INFO("CONNEXTION SET-UP");
+
+  // ****************************** SBG Config ******************************
+  // ToDo: improve configuration capabilities
+
+  errorCode = sbgEComCmdOutputSetConf(&comHandle, SBG_ECOM_OUTPUT_PORT_A, SBG_ECOM_CLASS_LOG_ECOM_0, SBG_ECOM_LOG_EKF_QUAT, SBG_ECOM_OUTPUT_MODE_MAIN_LOOP);
+  if (errorCode != SBG_NO_ERROR){ROS_WARN("sbgEComCmdOutputSetConf SBG_ECOM_LOG_EKF_QUAT Error");}
+
+  errorCode = sbgEComCmdOutputSetConf(&comHandle, SBG_ECOM_OUTPUT_PORT_A, SBG_ECOM_CLASS_LOG_ECOM_0, SBG_ECOM_LOG_EKF_NAV, SBG_ECOM_OUTPUT_MODE_NEW_DATA);
+  if (errorCode != SBG_NO_ERROR){ROS_WARN("sbgEComCmdOutputSetConf SBG_ECOM_LOG_EKF_NAV Error");}
+
+  errorCode = sbgEComCmdOutputSetConf(&comHandle, SBG_ECOM_OUTPUT_PORT_A, SBG_ECOM_CLASS_LOG_ECOM_0, SBG_ECOM_LOG_IMU_DATA, SBG_ECOM_OUTPUT_MODE_DIV_2);
+  if (errorCode != SBG_NO_ERROR){ROS_WARN("sbgEComCmdOutputSetConf SBG_ECOM_LOG_IMU_DATA Error");}
+
+  errorCode = sbgEComCmdOutputSetConf(&comHandle, SBG_ECOM_OUTPUT_PORT_A, SBG_ECOM_CLASS_LOG_ECOM_0, SBG_ECOM_LOG_SHIP_MOTION, SBG_ECOM_OUTPUT_MODE_NEW_DATA);
+  if (errorCode != SBG_NO_ERROR){ROS_WARN("sbgEComCmdOutputSetConf SBG_ECOM_LOG_SHIP_MOTION Error");}
+
+  errorCode = sbgEComCmdOutputSetConf(&comHandle, SBG_ECOM_OUTPUT_PORT_A, SBG_ECOM_CLASS_LOG_ECOM_0, SBG_ECOM_LOG_EKF_EULER, SBG_ECOM_OUTPUT_MODE_NEW_DATA);
+  if (errorCode != SBG_NO_ERROR){ROS_WARN("sbgEComCmdOutputSetConf SBG_ECOM_LOG_SHIP_MOTION Error");}
+
+  errorCode = sbgEComCmdOutputSetConf(&comHandle, SBG_ECOM_OUTPUT_PORT_A, SBG_ECOM_CLASS_LOG_ECOM_0, SBG_ECOM_LOG_GPS1_POS, SBG_ECOM_OUTPUT_MODE_MAIN_LOOP);
+  if (errorCode != SBG_NO_ERROR){ROS_WARN("sbgEComCmdOutputSetConf SBG_ECOM_LOG_GPS1_POS Error");}
+
+  if (sbgEComCmdOutputSetConf(&comHandle, SBG_ECOM_OUTPUT_PORT_A, SBG_ECOM_CLASS_LOG_ECOM_0, SBG_ECOM_LOG_GPS1_HDT, SBG_ECOM_OUTPUT_MODE_DIV_2) != SBG_NO_ERROR)
+			{
+				fprintf(stderr, "ellipseMinimal: Unable to configure output log SBG_ECOM_LOG_GPS1_HDT.\n");
+			}
+
+  // SAVE AND REBOOT
+  errorCode = sbgEComCmdSettingsAction(&comHandle, SBG_ECOM_SAVE_SETTINGS);
+  if (errorCode != SBG_NO_ERROR){ROS_WARN("sbgEComCmdSettingsAction Error");}
+
+  ROS_INFO("CONFIGURATION DONE");
+
+  // ************************** SBG Callback for data ************************
+  bool test = false;
+  sbgEComSetReceiveLogCallback(&comHandle, onLogReceived, NULL);
+
+  ROS_INFO("START RECEIVING DATA");
+
+  imu_msg.header.frame_id = "map";
+  nav_msg.header.frame_id = "map";
+  pose_msg.header.frame_id = "map";
+
+  ros::Rate loop_rate(200);
+  while (ros::ok())
+  {
+    Show();
+    int errorCode = sbgEComHandle(&comHandle);
+
+    if(new_nav_msg && status_ >= 2){
+      nav_msg.header.stamp = ros::Time::now();
+      gps_pub.publish(nav_msg);
+      new_nav_msg = false;
+
+      std_msgs::Int64 msg;//send gps status to net node
+      msg.data = status_;
+      gps_status_send.publish(msg);
+    }
+
+    if(new_imu_msg){
+      imu_msg.header.stamp = ros::Time::now();
+      imu_pub.publish(imu_msg);
+      pose_msg.header.stamp = ros::Time::now();
+      pose_pub.publish(pose_msg);
+
+      new_imu_msg = false;
+    }
+
+    if(new_heading == true){
+      stringstream s;
+      string ss;
+      string r;
+
+      s.clear();
+      ss.clear();
+      s<<(trace.x);
+      s>>ss;
+      r = ss;
+
+      s.clear();
+      ss.clear();
+      s<<trace.y;
+      s>>ss;
+      r.append(" ").append(ss);
+
+      s.clear();
+      ss.clear();
+      s<<trace.thea;
+      s>>ss;
+      r.append(" ").append(ss);
+
+      std_msgs::String msg;
+      msg.data = r;
+      heading_sbg.publish(msg);
+      //cout<<"send:"<<r<<endl;
+      new_heading = false;
+    }
+
+    ros::spinOnce();
+    loop_rate.sleep();
+  }
+
+  return 0;
+}
